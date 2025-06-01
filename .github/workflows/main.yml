@@ -12,6 +12,7 @@ jobs:
         run: mvn checkstyle:checkstyle
 
   CodeAnalysis:
+    needs: Testing
     runs-on: ubuntu-latest
     steps:
       - name: Code checkout
