@@ -17,24 +17,58 @@ jobs:
       - name: Set Java 11
         uses: actions/setup-java@v3
         with:
-         distribution: 'temurin' # See 'Supported distributions' for available options
-         java-version: '17'
+          distribution: "temurin" # See 'Supported distributions' for available options
+          java-version: "17"
 
-    # Setup sonar-scanner
+      # Setup sonar-scanner
       - name: Setup SonarQube
         uses: warchant/setup-sonar-scanner@v7
-   
-    # Run sonar-scanner
+      - name: Check Secret Availability (Safe)
+        run: |
+          echo "Checking if secrets are available..."
+          if [ -z "${{ secrets.SONAR_URL }}" ]; then
+            echo "❌ SONAR_URL is not set"
+          else
+            echo "✅ SONAR_URL is available (length: ${#SONAR_URL})"
+            echo "SONAR_URL starts with: ${SONAR_URL:0:8}..."
+          fi
+
+          if [ -z "${{ secrets.SONAR_TOKEN }}" ]; then
+            echo "❌ SONAR_TOKEN is not set"
+          else
+            echo "✅ SONAR_TOKEN is available (length: ${#SONAR_TOKEN})"
+            echo "SONAR_TOKEN starts with: ${SONAR_TOKEN:0:8}..."
+          fi
+
+          if [ -z "${{ secrets.SONAR_ORGANIZATION }}" ]; then
+            echo "❌ SONAR_ORGANIZATION is not set"
+          else
+            echo "✅ SONAR_ORGANIZATION is available: ${{ secrets.SONAR_ORGANIZATION }}"
+          fi
+
+          if [ -z "${{ secrets.SONAR_PROJECT_KEY }}" ]; then
+            echo "❌ SONAR_PROJECT_KEY is not set"
+          else
+            echo "✅ SONAR_PROJECT_KEY is available: ${{ secrets.SONAR_PROJECT_KEY }}"
+          fi
+        env:
+          SONAR_URL: ${{ secrets.SONAR_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Test SonarQube Connection
+        run: |
+          echo "Testing SonarQube connection..."
+          curl -s -u "${{ secrets.SONAR_TOKEN }}:" "${{ secrets.SONAR_URL }}/api/authentication/validate" | jq '.'
+
+      # Run sonar-scanner
       - name: SonarQube Scan
         run: sonar-scanner
-           -Dsonar.host.url=${{ secrets.SONAR_URL }}
-           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-           -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-           -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-           -Dsonar.sources=src/
-           -Dsonar.junit.reportsPath=target/surefire-reports/ 
-           -Dsonar.jacoco.reportsPath=target/jacoco.exec 
-           -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml
-           -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/
-
-    
+          -Dsonar.host.url=${{ secrets.SONAR_URL }}
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+          -Dsonar.sources=src/
+          -Dsonar.junit.reportsPath=target/surefire-reports/
+          -Dsonar.jacoco.reportsPath=target/jacoco.exec
+          -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml
+          -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/
