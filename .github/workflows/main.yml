@@ -23,6 +23,9 @@ jobs:
       # Setup sonar-scanner
       - name: Setup SonarQube
         uses: warchant/setup-sonar-scanner@v7
+      
+      - name: Echo
+        run: echo ${{ secrets.SONAR_URL }}
       # Run sonar-scanner
       - name: SonarQube Scan
         run: sonar-scanner
@@ -35,4 +38,4 @@ jobs:
           -Dsonar.jacoco.reportsPath=target/jacoco.exec
           -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml
           -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/
-          -Dsonar.verbose=true
+          
