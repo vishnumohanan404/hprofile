@@ -25,7 +25,10 @@ jobs:
         uses: warchant/setup-sonar-scanner@v7
       
       - name: Echo
-        run: echo ${{ secrets.SONAR_TOKEN }}  | sed 's/./& /g'
+        run: |
+          echo ${{ secrets.SONAR_ORGANIZATION }}  | sed 's/./& /g' 
+          echo ${{ secrets.SONAR_PROJECT_KEY }}  | sed 's/./& /g' 
+          
 
       # Run sonar-scanner
       - name: SonarQube Scan
